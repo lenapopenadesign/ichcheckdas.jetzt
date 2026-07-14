@@ -157,6 +157,10 @@ img{display:block;-webkit-user-drag:none;user-select:none}
 .rail button{width:10px;height:10px;border-radius:50%;border:none;background:#c9bfe4;cursor:pointer;padding:0;transition:all .25s}
 .rail button.on{background:var(--orange);height:26px;border-radius:100px}
 .progress{position:fixed;top:0;left:0;height:3px;background:var(--orange);z-index:90;width:0}
+.legal{position:fixed;left:clamp(16px,4vw,32px);bottom:12px;z-index:70;display:flex;gap:16px;
+  font-size:12px;font-weight:500}
+.legal a{color:var(--purple);opacity:.72;text-decoration:none;text-shadow:0 1px 6px rgba(247,243,255,.9)}
+.legal a:hover{opacity:1;text-decoration:underline}
 @media (max-width:640px){ .rail{right:10px} .label{width:48%} }
 @media (prefers-reduced-motion:reduce){ .mel>.floaty{animation:none} .hint .arrow{animation:none} html{scroll-behavior:auto} }
 </style>
@@ -182,6 +186,10 @@ img{display:block;-webkit-user-drag:none;user-select:none}
   <section class="snap"></section>
 </div>
 <nav class="rail" id="rail"></nav>
+<div class="legal">
+  <a href="https://www.abgeordnetenwatch.de/ueber-uns/impressum" target="_blank" rel="noopener">Impressum</a>
+  <a href="https://www.abgeordnetenwatch.de/datenschutzerklaerung" target="_blank" rel="noopener">Datenschutz</a>
+</div>
 
 <script>
 const A="./assets/";
