@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>kandidierendencheck – ich check das jetzt.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#6a5a8e;
+  --purple-dark:#3a324c;
+  --purple-deep:#291c4d;
+  --orange:#f46b3b;
+  --bg:#f7f3ff;
+  --bg-2:#efe9fb;
+  --white:#fff;
+  --card-radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+body{
+  font-family:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);color:var(--purple-dark);
+  -webkit-font-smoothing:antialiased;overscroll-behavior-y:none;
+}
+img{display:block;-webkit-user-drag:none;user-select:none}
+
+/* ---------- header ---------- */
+.site-header{position:fixed;top:0;left:0;right:0;height:64px;z-index:80;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(16px,4vw,32px);pointer-events:none}
+.site-header>*{pointer-events:auto}
+.logo{font-weight:700;font-size:clamp(17px,2.2vw,22px);letter-spacing:.02em;color:var(--purple)}
+.logo .c{color:var(--orange)}
+.header-cta{background:var(--orange);color:#fff;font-weight:700;font-size:14px;border:none;border-radius:6px;
+  padding:11px 18px;cursor:pointer;text-decoration:none;box-shadow:0 6px 16px rgba(244,107,59,.32);
+  transition:transform .15s,box-shadow .15s}
+.header-cta:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(244,107,59,.42)}
+
+/* ---------- scroll structure ---------- */
+.viewport{position:fixed;inset:0;height:100vh;height:100dvh;overflow:hidden;z-index:1}
+.scroller{position:relative;z-index:2;pointer-events:none}
+.snap{height:100vh;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always}
+.stage{position:absolute;left:50%;top:50%;width:1280px;height:832px;
+  transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center center}
+
+/* morph element */
+.mel{position:absolute;left:0;top:0;transform-origin:center center;will-change:transform,opacity;
+  backface-visibility:hidden}
+.mel>.floaty{width:100%;height:100%;animation:bob var(--fd,7s) ease-in-out var(--dl,0s) infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.mel img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 14px 22px rgba(41,28,77,.18))}
+/* flat = figma render whose bg already matches the page; no extra shadow (avoids a visible rectangle) */
+.mel.flat img{filter:none}
+/* ballot: clip the transparent top strip, keep only the paper */
+.mel.ballot{overflow:hidden;border-radius:7px;box-shadow:0 20px 34px rgba(41,28,77,.30)}
+.mel.ballot .floaty{overflow:hidden;border-radius:7px}
+.mel.ballot img{width:100%;height:100%;object-fit:cover;object-position:center 100%;filter:none}
+/* bg map: show only the left (pink Saxony) half of the two-map image */
+.mel.bg{overflow:hidden}
+.mel.bg .floaty{overflow:hidden;position:relative}
+.mel.bg img{position:absolute;left:0;top:0;height:100%;width:auto;max-width:none;filter:none}
+
+/* party / thesis card */
+.pcard{position:relative;width:100%;height:100%;border-radius:var(--card-radius);overflow:hidden;
+  box-shadow:0 12px 26px rgba(41,28,77,.30)}
+.pcard .photo{position:absolute;inset:0;background-size:cover;background-position:center;filter:grayscale(100%) contrast(1.05)}
+.pcard .tint{position:absolute;inset:0;background:var(--purple);mix-blend-mode:hard-light}
+.pcard .grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(41,28,77,0) 26%,rgba(41,28,77,.30) 58%,rgba(41,28,77,.92))}
+/* topic title as real text (matches figma 61:2032): bottom-left, white, no distortion */
+.pcard .ctitle{position:absolute;left:9%;right:12%;bottom:8%;color:#fff;font-weight:600;
+  font-size:18px;line-height:1.14;letter-spacing:-.01em;text-align:left;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+/* phone device frame around the figma result screen */
+.device{width:100%;height:100%;background:#eee7fb;border-radius:30px;padding:8px;position:relative;
+  box-shadow:0 30px 55px rgba(41,28,77,.30),inset 0 0 0 1.5px rgba(41,28,77,.08)}
+.device .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:26%;height:7px;
+  background:#d9cff2;border-radius:100px;z-index:3}
+.device .scr{width:100%;height:100%;border-radius:23px;overflow:hidden;background:#fff}
+.device .scr img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+
+/* product: swipe card */
+.swipe-card{width:100%;height:100%;background:#fff;border-radius:24px;overflow:hidden;
+  box-shadow:0 26px 50px rgba(41,28,77,.28);display:flex;flex-direction:column}
+.swipe-card .pic{height:58%;background-size:cover;background-position:center top;position:relative}
+.swipe-card .pic::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(41,28,77,.12))}
+.swipe-card .body{flex:1;padding:20px 22px;display:flex;align-items:center}
+.swipe-card .body p{font-weight:800;font-size:19px;line-height:1.25;color:var(--purple)}
+.vote{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:26px}
+.vote .btn{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:800;color:#fff;box-shadow:0 10px 22px rgba(41,28,77,.22)}
+.vote .no{background:var(--orange)}
+.vote .neutral{background:#fff;border:5px solid #cfc4ec;color:var(--purple);font-size:20px}
+.vote .yes{background:var(--purple)}
+.result-card{width:100%;height:100%;background:#fff;border-radius:22px;box-shadow:0 22px 44px rgba(41,28,77,.20);
+  padding:20px;display:flex;flex-direction:column;gap:14px}
+.result-card h3{font-size:18px;font-weight:800;color:var(--purple);line-height:1.2}
+.match{display:flex;align-items:center;gap:12px}
+.match .av{width:46px;height:46px;border-radius:50%;overflow:hidden;flex:0 0 auto;background:var(--bg-2)}
+.match .av img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.match .info{flex:1;min-width:0}
+.match .info .nm{font-size:14px;font-weight:700;color:var(--purple-dark)}
+.match .bar{height:8px;border-radius:100px;background:var(--bg-2);margin-top:5px;overflow:hidden}
+.match .bar i{display:block;height:100%;border-radius:100px;background:linear-gradient(90deg,var(--purple),var(--orange))}
+.match .pct{font-weight:800;font-size:15px;color:var(--orange);flex:0 0 auto}
+
+/* phone */
+.phone{width:100%;height:100%;background:#241a3d;border-radius:30px;padding:10px;box-shadow:0 30px 60px rgba(41,28,77,.40)}
+.phone .screen{width:100%;height:100%;background:var(--bg);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
+.phone .top{background:linear-gradient(150deg,#7e6cae,#4a3d6b);color:#fff;padding:16px 16px 14px}
+.phone .top .b{font-weight:700;font-size:13px}.phone .top .b .c{color:var(--orange)}
+.phone .top .h{font-weight:800;font-size:16px;margin-top:8px;line-height:1.15}
+.phone .list{padding:12px;display:flex;flex-direction:column;gap:9px;flex:1}
+.phone .prow{display:flex;align-items:center;gap:9px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 4px 12px rgba(41,28,77,.07)}
+.phone .prow .av{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:0 0 auto;background:var(--bg-2)}
+.phone .prow .av img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.phone .prow .nm{flex:1;font-size:11px;font-weight:700;color:var(--purple-dark)}
+.phone .prow .pc{font-size:13px;font-weight:800;color:var(--orange)}
+
+/* ---------- copy overlays ---------- */
+.copy{position:absolute;inset:0;z-index:40;pointer-events:none}
+.ctext{position:absolute;left:0;right:0;bottom:9%;padding:0 24px;text-align:center;isolation:isolate}
+.ctext::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(820px,94%);height:210%;z-index:-1;pointer-events:none;
+  background:radial-gradient(56% 56% at 50% 50%,rgba(247,243,255,.94) 0%,rgba(247,243,255,.66) 44%,rgba(247,243,255,0) 74%)}
+.headline{font-weight:800;letter-spacing:-.02em;line-height:1.03;color:var(--purple);
+  font-size:clamp(30px,4.6vw,44px);text-shadow:0 2px 14px rgba(247,243,255,.96),0 0 30px rgba(247,243,255,.9)}
+.headline .o{color:var(--orange)}
+.headline .s{text-decoration:line-through;text-decoration-color:var(--orange)}
+.subline{margin:16px auto 0;max-width:36ch;font-weight:400;font-size:clamp(14px,1.7vw,17px);color:var(--purple);line-height:1.5;
+  text-shadow:0 1px 10px rgba(247,243,255,.98),0 0 20px rgba(247,243,255,.9)}
+.hint{margin-top:22px;font-weight:400;font-size:15px;color:var(--purple);opacity:.9;display:inline-flex;align-items:center;gap:10px}
+.hint .arrow{display:inline-block;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* scene 6 split bits */
+.label{position:absolute;text-align:center;width:44%}
+.label.left{left:1%;bottom:16%}.label.right{right:1%;bottom:16%}
+.label .headline{font-size:clamp(22px,3vw,32px)}
+.chip{position:absolute;display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:100px;
+  padding:9px 16px;font-weight:700;font-size:14px;color:var(--purple);white-space:nowrap;box-shadow:0 10px 24px rgba(41,28,77,.14)}
+.chip.warn{color:var(--orange)}.chip .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+.chip.l{left:6%;top:16%}.chip.r{right:12%;top:16%}
+.act-cta{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);pointer-events:auto;
+  background:var(--orange);color:#fff;font-weight:800;font-size:clamp(15px,2vw,18px);border:none;border-radius:14px;
+  padding:16px 30px;cursor:pointer;text-decoration:none;white-space:nowrap;
+  box-shadow:0 16px 34px rgba(244,107,59,.4);transition:transform .15s,box-shadow .15s}
+.act-cta:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 20px 40px rgba(244,107,59,.5)}
+/* scene-6 split overlay, positioned in stage coords so it scales with the collage */
+.s5h{position:absolute;top:672px;transform:translateX(-50%);width:470px;text-align:center;font-size:34px}
+.act-cta.s5btn{position:absolute;top:662px;bottom:auto;transform:translateX(-50%);font-size:19px}
+
+/* ---------- nav ---------- */
+.rail{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:12px}
+.rail button{width:10px;height:10px;border-radius:50%;border:none;background:#c9bfe4;cursor:pointer;padding:0;transition:all .25s}
+.rail button.on{background:var(--orange);height:26px;border-radius:100px}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--orange);z-index:90;width:0}
+@media (max-width:640px){ .rail{right:10px} .label{width:48%} }
+@media (prefers-reduced-motion:reduce){ .mel>.floaty{animation:none} .hint .arrow{animation:none} html{scroll-behavior:auto} }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<header class="site-header">
+  <div class="logo">kandidierenden<span class="c">check</span></div>
+  <a class="header-cta" href="https://www.kandidierendencheck.de" target="_blank" rel="noopener">check das jetzt</a>
+</header>
+
+<div class="viewport">
+  <div class="stage" id="stage"></div>
+  <div id="copylayer"></div>
+</div>
+<div class="scroller" id="scroller">
+  <section class="snap"></section>
+  <section class="snap"></section>
+  <section class="snap"></section>
+  <section class="snap"></section>
+  <section class="snap"></section>
+  <section class="snap"></section>
+</div>
+<nav class="rail" id="rail"></nav>
+
+<script>
+const A="./assets/";
+const SCENES=6;
+
+/* ---------------- figma coordinates (stage 1280x832) ---------------- */
+// candidates: heap(act1) & row(act2) as [cx,cy,w,h,rot]
+const CAND=[
+ {img:1, heap:[387.5,223.8,124.9,171.3,8],  row:[414.9,331.3,284.2,366.7,-3]},
+ {img:2, heap:[563.9,185.9,123.1,181.3,-5], row:[530.3,292.7,270.8,378.8,-2]},
+ {img:3, heap:[790.9,256.1,135.2,195.2,4],  row:[563.3,202.0,290.4,404.0,-2]},
+ {img:4, heap:[895.8,347.6,120.5,164.7,-7], row:[839.4,343.6,268.8,349.2,4]},
+ {img:5, heap:[399.8,415.2,90.9,169.1,-6],  row:[781.1,217.1,205.0,350.1,3]},
+ {img:6, heap:[613.6,363.7,137.6,181.3,6],  row:[452.4,426.9,293.8,376.4,2]},
+ {img:7, heap:[771.6,439.6,110.3,158.8,-4], row:[700.0,392.1,247.5,335.7,-3]},
+];
+// cards: heap(act1) [cx,cy,rot] + thesis(act3) [cx,cy,w,h]
+const CARD=[
+ {heap:[687.9,549.8,-9.96], th:[640.6,318.2,232,260]},
+ {heap:[698.7,546.0,-7.45], th:[717.6,423.2,255,278]},
+ {heap:[686.1,565.8,-7.46], th:[673.9,452.9,260,282]},
+ {heap:[684.8,551.7,-3.17], th:[648.8,391.2,199,232]},
+ {heap:[848.0,508.0,1.24],  th:[601.3,437.7,216,247]},
+ {heap:[846.3,520.8,7.39],  th:[592.0,368.1,241,267]},
+ {heap:[840.6,524.6,6.96],  th:[548.4,388.1,241,266]},
+ {heap:[595.7,570.6,9.85],  th:[537.0,398.0,253,276]},
+ {heap:[406.5,271.0,3.54],  th:[579.1,308.4,237,264]},
+ {heap:[400.5,266.3,4.17],  th:[572.0,309.2,247,272]},
+ {heap:[407.3,269.6,8.29],  th:[624.5,241.1,203,236]},
+ {heap:[412.6,264.0,4.35],  th:[654.1,293.5,235,262]},
+ {heap:[489.9,509.8,3.70],  th:[715.0,292.1,221,250]},
+ {heap:[708.1,189.3,-8.75], th:[773.7,300.6,250,274]},
+ {heap:[483.1,310.2,-4.83], th:[487.2,444.3,222,251]},
+];
+// topic titles in the order of thesis/photo-00..20 (figma dom order)
+const TTITLE=[
+ "Öffentlich-rechtlicher Rundfunk","Infrastruktur auf dem Land","Ansiedlung neuer Arbeitgeber",
+ "Antidiskriminierung","Ausbau von Windkraft","Kostenlose Kinderbetreuung",
+ "Medizinische Versorgung auf dem Land","Ausbau von Straßen","Gesetzlicher Lobby-Fußabdruck",
+ "Arbeitspflicht für Geflüchtete","Dürreschäden / Folgen des Klimawandels","Karenzzeit für Abgeordnete",
+ "Verkaufsoffener Sonntag","Verbandsklagerecht","Videoüberwachung","Fachkräftemangel",
+ "Strukturwandel","Schulpflicht","Volksbegehren","Handyverbot","Wahlrecht ab 16",
+];
+const TCARD_W=198.655, TCARD_H=231.764;   // topic card core size (figma)
+
+// ballot
+const BAL={heap:[599.7,404.6,0.714,-9], big:[613.7,350.9,1,-3]};
+const BAL_W=420, BAL_H=515;
+
+// left-heap mapping for the final split (act6 = scaled act1 group)
+function mini(cx,cy){ return [ (cx-278)*0.66+150, (cy-64)*0.66+150 ]; }
+const MINI_S=0.66;
+
+/* ---------------- helpers ---------------- */
+let fi=0;
+function floatVars(){ fi++; return `--fd:${(5+(fi*1.7%4)).toFixed(1)}s;--dl:${((fi*0.6)%3).toFixed(1)}s`; }
+function mel(baseW,baseH,cls,inner,stagger){
+  const d=document.createElement('div'); d.className='mel'+(cls?' '+cls:'');
+  d.style.width=baseW+'px'; d.style.height=baseH+'px';
+  const f=document.createElement('div'); f.className='floaty'; f.setAttribute('style',floatVars());
+  f.appendChild(inner); d.appendChild(f);
+  return {node:d, st:stagger||0, k:[]};
+}
+function imgEl(src,alt){ const i=document.createElement('img'); i.src=src; i.alt=alt||''; return i; }
+function topicCard(pi){
+  const w=document.createElement('div'); w.className='pcard';
+  const p=document.createElement('div'); p.className='photo';
+  p.style.backgroundImage=`url(${A}thesis/photo-${String(pi).padStart(2,'0')}.png)`;
+  w.appendChild(p);
+  w.insertAdjacentHTML('beforeend','<div class="tint"></div><div class="grad"></div>');
+  const t=document.createElement('div'); t.className='ctitle'; t.textContent=TTITLE[pi];
+  w.appendChild(t); return w;
+}
+
+/* ---------------- build elements + keyframes ---------------- */
+const stage=document.getElementById('stage');
+const ELS=[];
+const AWAY_Y=-360;      // people fly up out
+const BELOW_Y=1240;     // things wait / exit below
+const PILE=[640,440];   // central collapse point
+
+// order matters for stacking: bg, ballot, cards, candidates, product, phone
+// --- bg map (faint) ---
+(()=>{
+  const m=mel(560,600,'bg',imgEl(A+'bg-collage.png'),0);
+  const [mx,my]=mini(590,392);
+  m.k=[
+   {x:585,y:392,s:.95,r:3,o:.62},    // 0 heap
+   {x:585,y:392,s:.95,r:3,o:0},      // 1
+   {x:585,y:392,s:.95,r:3,o:0},      // 2
+   {x:690,y:392,s:1.5,r:0,o:.78},    // 3 ballot page (strong saxony)
+   {x:690,y:392,s:1.5,r:0,o:0},      // 4
+   {x:mx,y:my,s:.95*MINI_S,r:3,o:.45},// 5 reassemble
+  ];
+  m.node.style.opacity=0; stage.appendChild(m.node); ELS.push(m);
+})();
+
+// (ballot is built AFTER candidates so it renders in front — see below)
+
+// --- heap cards (act1 real assets): heap -> recede -> reassemble ---
+const HEAP_CARD_S=0.58;
+CARD.forEach((c,i)=>{
+  const el=mel(TCARD_W,TCARD_H,'card',topicCard(i), (i%6)*0.018);
+  const [mx,my]=mini(c.heap[0],c.heap[1]);
+  const gone={x:PILE[0],y:PILE[1],s:.22,r:0,o:0};
+  el.k=[
+   {x:c.heap[0],y:c.heap[1],s:HEAP_CARD_S,r:c.heap[2],o:1},        // 0 heap
+   gone,                                                           // 1 recede into pile
+   gone,                                                           // 2 (thesis cards take over)
+   gone,                                                           // 3
+   gone,                                                           // 4
+   {x:mx,y:my,s:HEAP_CARD_S*MINI_S,r:c.heap[2],o:1},               // 5 reassemble
+  ];
+  el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
+});
+
+// --- candidates ---
+CAND.forEach((c,i)=>{
+  const el=mel(c.row[2],c.row[3],'',imgEl(A+'candidates/kandidatin-'+String(c.img).padStart(2,'0')+'.png'), (i%7)*0.02);
+  const heapS=c.heap[2]/c.row[2];
+  const away={x:c.row[0]+(c.row[0]-640)*0.3,y:AWAY_Y,s:heapS*1.05,r:c.row[4],o:0};
+  const [mx,my]=mini(c.heap[0],c.heap[1]);
+  el.k=[
+   {x:c.heap[0],y:c.heap[1],s:heapS,r:c.heap[4],o:1},              // 0 heap
+   {x:c.row[0],y:c.row[1],s:1,r:c.row[4],o:1},                     // 1 gather -> row
+   away,                                                            // 2 fly away up
+   away,                                                            // 3
+   away,                                                            // 4
+   {x:mx,y:my,s:heapS*MINI_S,r:c.heap[4],o:1},                     // 5 reassemble
+  ];
+  el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
+});
+
+// --- ballot (real asset, built here so it renders IN FRONT of the heap) ---
+(()=>{
+  const b=mel(BAL_W,BAL_H,'ballot',imgEl(A+'ballot-orig.png','Stimmzettel'),.04);
+  const [mx,my]=mini(600,402);
+  b.k=[
+   {x:600,y:402,s:.72,r:-9,o:1},                 // 0 heap: big, central, front
+   {x:PILE[0],y:PILE[1],s:.40,r:-6,o:0},         // 1 recede
+   {x:614,y:BELOW_Y,s:1,r:-5,o:0},               // 2 wait below
+   {x:614,y:352,s:1,r:-5,o:1},                   // 3 slide up big (ballot page)
+   {x:614,y:-600,s:1,r:-5,o:0},                  // 4 fly up out
+   {x:mx,y:my,s:.72*MINI_S,r:-9,o:1},            // 5 reassemble
+  ];
+  b.node.style.opacity=0; stage.appendChild(b.node); ELS.push(b);
+})();
+
+// --- thesis cards (act3 real assets): fly in for scene 2, drop out for scene 3 ---
+// [photoIdx, cx, cy, rot, logoW, logoH]  (card core 198.655 x 231.764)
+const THESIS=[
+ [0,720.92,318.19,8.84,114.9,84.1],[1,717.60,367.91,-16.16,160.9,85.0],[2,673.85,391.76,-17.91,128.8,92.0],
+ [3,648.44,391.09,0,159.8,46.0],[4,601.29,422.09,-4.51,113.1,44.4],[5,545.73,368.11,11.53,165.4,77.0],
+ [6,548.38,348.84,-11.4,155.1,85.9],[7,537.00,344.84,-15.52,109.3,63.4],[8,537.70,308.44,10.29,132.0,85.4],
+ [9,571.97,262.77,-13.53,163.9,75.3],[10,624.50,236.93,-1.2,152.7,70.5],[11,654.09,260.37,-9.61,138.8,61.7],
+ [12,692.06,292.07,5.68,164.5,53.0],[13,715.88,310.64,14.45,171.5,56.7],[14,462.94,444.31,6,133.2,58.8],
+ [15,816.10,444.31,-6,119.0,50.6],[16,622.97,469.14,-3,153.0,23.9],[17,440.90,302.09,6,115.7,26.9],
+ [18,601.26,361.38,-3,146.5,21.9],[19,678.15,259.45,4,130.0,24.3],[20,841.05,248.56,-5,158.2,28.6],
+];
+THESIS.forEach((t,i)=>{
+  const [pi,cx,cy,rot]=t;
+  const el=mel(TCARD_W,TCARD_H,'card',topicCard(pi), (i%7)*0.016);
+  const pile={x:640,y:440,s:.30,r:rot*0.4,o:0};
+  el.k=[
+   pile, pile,
+   {x:cx,y:cy,s:1,r:rot,o:1},              // 2 thesis deck (fly in)
+   {x:cx,y:cy+940,s:.7,r:rot,o:0},         // 3 drop out below
+   pile, pile,
+  ];
+  el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
+});
+
+// --- product (scene 4) : real figma renders ---
+function productEls(){
+  // real Karte + Voting Inputs, composed & tilted exactly as in Figma (Group 1)
+  const cv=mel(366,412,'flat',imgEl(A+'ui/card-voting.png'),0);
+  cv.k=fill([{x:498,y:1180,s:1,r:0,o:0}],{x:498,y:372,s:1,r:0,o:1},{x:498,y:-360,s:1,r:0,o:0});
+
+  const r=mel(404,355,'flat',imgEl(A+'ui/results.png'),.06);      // real Kandidierende panel
+  r.k=fill([{x:874,y:1220,s:1,r:0,o:0}],{x:874,y:352,s:1,r:0,o:1},{x:874,y:-330,s:1,r:0,o:0});
+
+  [cv,r].forEach(e=>{ e.node.style.opacity=0; stage.appendChild(e.node); ELS.push(e); });
+}
+// helper: keyframes that are `parked` for scenes 0-3, `inState` at 4, `outState` at 5
+function fill(parked, inState, outState){
+  const p=parked[0];
+  return [p,p,p,p,inState,outState];
+}
+function matchRow(img,name,pct){
+  return `<div class="match"><div class="av"><img src="${A}candidates/${img}.png" alt=""></div>
+    <div class="info"><div class="nm">${name}</div><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="pct">${pct}%</div></div>`;
+}
+productEls();
+
+// --- phone (scene 5) : real figma Ergebnisseite ---
+(()=>{
+  const dev=document.createElement('div'); dev.className='device';
+  dev.innerHTML=`<div class="notch"></div><div class="scr"><img src="${A}ui/phone.png" alt=""></div>`;
+  const el=mel(212,424,'',dev,0);
+  const rest={x:1500,y:393,s:1,r:0,o:0};
+  el.k=[rest,rest,rest,rest,rest,{x:915,y:393,s:1,r:0,o:1}];
+  el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
+})();
+
+/* ---------------- copy overlays ---------------- */
+const copylayer=document.getElementById('copylayer');
+const COPY=[
+ `<div class="ctext"><h1 class="headline">ich check das <span class="o">nicht!</span></h1>
+    <div class="hint"><span>Scroll dich durch</span><span class="arrow">↓</span></div></div>`,
+ `<div class="ctext"><h1 class="headline">wer sind meine<br><span class="o">kandidierenden?</span></h1></div>`,
+ `<div class="ctext"><h1 class="headline">wie stehen sie zu<br><span class="o">meinen themen?</span></h1></div>`,
+ `<div class="ctext"><h1 class="headline">wer kriegt meine<br><span class="o">erststimme?</span></h1></div>`,
+ `<div class="ctext"><h1 class="headline">check das <span class="o">jetzt!</span></h1>
+    <p class="subline">Wie bei Tinder – nur mit Haltung: Thesen swipen, PLZ rein, Match sehen.</p></div>`,
+];
+const COPIES=COPY.map(html=>{ const d=document.createElement('div'); d.className='copy'; d.innerHTML=html; d.style.opacity=0; copylayer.appendChild(d); return d; });
+
+/* scene 6 (split) overlay — lives INSIDE the stage so chip/headline align with heap & phone */
+const LEFTX=395, RIGHTX=915;
+const scene5=document.createElement('div');
+scene5.style.cssText='position:absolute;inset:0;z-index:30;pointer-events:none';
+scene5.innerHTML=`
+  <div class="chip warn" style="left:${LEFTX}px;top:116px;transform:translateX(-50%)"><span class="dot"></span>Stunden – und noch mehr Verwirrung</div>
+  <div class="chip" style="left:${RIGHTX}px;top:116px;transform:translateX(-50%)"><span class="dot"></span>2 Minuten</div>
+  <h1 class="headline s5h" style="left:${LEFTX}px">ich check das <span class="o">nicht.</span></h1>
+  <a class="act-cta s5btn" style="left:${RIGHTX}px" href="https://www.kandidierendencheck.de" target="_blank" rel="noopener">ich check das jetzt</a>`;
+scene5.style.opacity=0; scene5.style.visibility='hidden';
+stage.appendChild(scene5);
+
+/* rail dots */
+const rail=document.getElementById('rail');
+for(let i=0;i<SCENES;i++){ const b=document.createElement('button'); b.setAttribute('aria-label','Szene '+(i+1));
+  b.addEventListener('click',()=>goTo(i)); rail.appendChild(b); }
+const dots=[...rail.children];
+
+/* ---------------- engine ---------------- */
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function lerp(a,b,t){return a+(b-a)*t}
+function easeInOut(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+
+function render(t){
+  t=clamp(t,0,SCENES-1);
+  const seg=Math.min(Math.floor(t),SCENES-2), f=t-seg;
+  for(const e of ELS){
+    const a=e.k[seg], b=e.k[seg+1];
+    const lf=easeInOut(clamp((f-e.st)/(1-e.st),0,1));
+    const o=lerp(a.o,b.o,lf);
+    if(o<0.008){ e.node.style.opacity=0; e.node.style.visibility='hidden'; continue; }
+    e.node.style.visibility='visible';
+    const x=lerp(a.x,b.x,lf), y=lerp(a.y,b.y,lf), s=lerp(a.s,b.s,lf), r=lerp(a.r,b.r,lf);
+    e.node.style.opacity=o;
+    e.node.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%) rotate(${r}deg) scale(${s})`;
+  }
+  COPIES.forEach((c,i)=>{ c.style.opacity=clamp(1-Math.abs(t-i)*2.4,0,1); });
+  const s5o=clamp(1-Math.abs(t-5)*2.4,0,1);
+  scene5.style.opacity=s5o; scene5.style.visibility=s5o<0.02?'hidden':'visible';
+  const idx=Math.round(t);
+  dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
+  document.getElementById('progress').style.width=(t/(SCENES-1)*100)+'%';
+}
+
+/* scaling */
+function rescale(){
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const s=Math.min(vw/1280, vh/832)*(vw<640?0.98:0.94);
+  stage.style.setProperty('--s',s);
+}
+
+/* scroll -> t */
+let ticking=false;
+function onScroll(){ if(!ticking){ticking=true; requestAnimationFrame(()=>{ ticking=false;
+  const vh=window.innerHeight;
+  render(window.pageYOffset/vh);
+});}}
+window.addEventListener('scroll',onScroll,{passive:true});
+window.addEventListener('resize',()=>{rescale();onScroll();});
+
+/* nav */
+function goTo(i){ i=clamp(i,0,SCENES-1); window.scrollTo({top:i*window.innerHeight,behavior:'smooth'}); }
+window.addEventListener('keydown',e=>{
+  const cur=Math.round(window.pageYOffset/window.innerHeight);
+  if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' '){e.preventDefault();goTo(cur+1);}
+  if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();goTo(cur-1);}
+});
+
+/* init */
+rescale();
+render(0);
+</script>
+</body>
+</html>
