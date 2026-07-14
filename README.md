@@ -44,6 +44,13 @@ geteilten Elementen, die beim Scrollen zwischen ihren Positionen pro Szene
 interpolieren (scroll-driven Keyframes), plus CSS-`scroll-snap` zwischen den
 Szenen. Nur die Schriftart *Outfit* wird von Google Fonts geladen.
 
+## Lizenz
+
+- **Code** (`index.html`, Styles, Scroll-Engine): [MIT](LICENSE)
+- **Medien** (Bilder in `assets/`): Creative Commons – je nach Quelle unter der
+  jeweiligen CC-Lizenz, **nicht** unter MIT. Bei Weiterverwendung bitte die
+  jeweilige Lizenz/Namensnennung beachten.
+
 ## Credits
 
 Design & Konzept: Kandidierendencheck / abgeordnetenwatch.de
