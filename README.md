@@ -42,7 +42,7 @@ assets/
 Kein Build-Schritt, keine Abhängigkeiten. Eine persistente „Bühne" mit
 geteilten Elementen, die beim Scrollen zwischen ihren Positionen pro Szene
 interpolieren (scroll-driven Keyframes), plus CSS-`scroll-snap` zwischen den
-Szenen. Nur die Schriftart *Outfit* wird von Google Fonts geladen.
+Szenen. **Keine externen Requests:** Die Schrift *Outfit* ist selbst gehostet (`assets/fonts/`, woff2) – Google Fonts wird nicht geladen.
 
 ## Lizenz
 

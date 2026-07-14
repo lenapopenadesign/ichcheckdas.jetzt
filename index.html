@@ -4,10 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>kandidierendencheck – ich check das jetzt.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* selbst gehostete Schrift – kein externer Request (Datenschutz) */
+@font-face{font-family:'Outfit';font-weight:300;font-style:normal;font-display:swap;src:url('assets/fonts/outfit-300.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:400;font-style:normal;font-display:swap;src:url('assets/fonts/outfit-400.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:500;font-style:normal;font-display:swap;src:url('assets/fonts/outfit-500.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:600;font-style:normal;font-display:swap;src:url('assets/fonts/outfit-600.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:700;font-style:normal;font-display:swap;src:url('assets/fonts/outfit-700.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:800;font-style:normal;font-display:swap;src:url('assets/fonts/outfit-800.woff2') format('woff2')}
 :root{
   --purple:#6a5a8e;
   --purple-dark:#3a324c;
@@ -243,6 +247,17 @@ const BAL_W=420, BAL_H=515;
 function mini(cx,cy){ return [ (cx-278)*0.66+150, (cy-64)*0.66+150 ]; }
 const MINI_S=0.66;
 
+// --- mobile: split scene stacks vertically, centred ---
+const MOB=()=>window.innerWidth<700;
+const HCX=640, HCY=388;                                  // native heap centre
+function miniM(cx,cy){ return [ (cx-HCX)*0.42+640, (cy-HCY)*0.42+206 ]; }
+const MINI_S_M=0.42;
+function tag5(el, heapCx, heapCy, baseScale, rot, op){    // store desktop + mobile scene-5 state
+  el.k5d = el.k[5];
+  const [mx,my]=miniM(heapCx,heapCy);
+  el.k5m = {x:mx, y:my, s:baseScale*MINI_S_M, r:rot, o:op};
+}
+
 /* ---------------- helpers ---------------- */
 let fi=0;
 function floatVars(){ fi++; return `--fd:${(5+(fi*1.7%4)).toFixed(1)}s;--dl:${((fi*0.6)%3).toFixed(1)}s`; }
@@ -284,6 +299,7 @@ const PILE=[640,440];   // central collapse point
    {x:690,y:392,s:1.5,r:0,o:0},      // 4
    {x:mx,y:my,s:.95*MINI_S,r:3,o:.45},// 5 reassemble
   ];
+  tag5(m, 590,392, .95, 3, .45);
   m.node.style.opacity=0; stage.appendChild(m.node); ELS.push(m);
 })();
 
@@ -303,6 +319,7 @@ CARD.forEach((c,i)=>{
    gone,                                                           // 4
    {x:mx,y:my,s:HEAP_CARD_S*MINI_S,r:c.heap[2],o:1},               // 5 reassemble
   ];
+  tag5(el, c.heap[0], c.heap[1], HEAP_CARD_S, c.heap[2], 1);
   el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
 });
 
@@ -320,6 +337,7 @@ CAND.forEach((c,i)=>{
    away,                                                            // 4
    {x:mx,y:my,s:heapS*MINI_S,r:c.heap[4],o:1},                     // 5 reassemble
   ];
+  tag5(el, c.heap[0], c.heap[1], heapS, c.heap[4], 1);
   el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
 });
 
@@ -335,6 +353,7 @@ CAND.forEach((c,i)=>{
    {x:614,y:-600,s:1,r:-5,o:0},                  // 4 fly up out
    {x:mx,y:my,s:.72*MINI_S,r:-9,o:1},            // 5 reassemble
   ];
+  tag5(b, 600,402, .72, -9, 1);
   b.node.style.opacity=0; stage.appendChild(b.node); ELS.push(b);
 })();
 
@@ -392,6 +411,7 @@ productEls();
   const el=mel(212,424,'',dev,0);
   const rest={x:1500,y:393,s:1,r:0,o:0};
   el.k=[rest,rest,rest,rest,rest,{x:915,y:393,s:1,r:0,o:1}];
+  el.k5d=el.k[5]; el.k5m={x:640,y:600,s:.66,r:0,o:1};   // mobile: centred, lower
   el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
 })();
 
@@ -455,8 +475,33 @@ function render(t){
 /* scaling */
 function rescale(){
   const vw=window.innerWidth, vh=window.innerHeight;
-  const s=Math.min(vw/1280, vh/832)*(vw<640?0.98:0.94);
+  let s;
+  if(vw<700){ s=Math.min(vw/560, vh/820); }        // mobile: Collage größer, links/rechts angeschnitten
+  else{ s=Math.min(vw/1280, vh/832)*0.94; }
   stage.style.setProperty('--s',s);
+}
+
+/* responsive: split scene side-by-side (desktop) vs stacked (mobile) */
+function applyLayout(){
+  const m=MOB();
+  for(const e of ELS){ if(e.k5m){ e.k[5]=m?e.k5m:e.k5d; } }
+  const cW=scene5.querySelector('.chip.warn'),
+        c2=scene5.querySelector('.chip:not(.warn)'),
+        hl=scene5.querySelector('.s5h'),
+        bt=scene5.querySelector('.s5btn');
+  if(m){
+    cW.style.cssText='left:640px;top:44px;transform:translateX(-50%);font-size:22px';
+    hl.style.cssText='left:640px;top:340px;transform:translateX(-50%);width:94%;text-align:center;font-size:46px';
+    c2.style.cssText='left:640px;top:430px;transform:translateX(-50%);font-size:22px';
+    bt.style.cssText='left:640px;top:790px;transform:translateX(-50%);font-size:28px';
+  }else{
+    cW.style.cssText='left:'+LEFTX+'px;top:116px;transform:translateX(-50%)';
+    c2.style.cssText='left:'+RIGHTX+'px;top:116px;transform:translateX(-50%)';
+    hl.style.cssText='left:'+LEFTX+'px';
+    bt.style.cssText='left:'+RIGHTX+'px';
+  }
+  rescale();
+  render(window.pageYOffset/window.innerHeight || 0);
 }
 
 /* scroll -> t */
@@ -466,7 +511,7 @@ function onScroll(){ if(!ticking){ticking=true; requestAnimationFrame(()=>{ tick
   render(window.pageYOffset/vh);
 });}}
 window.addEventListener('scroll',onScroll,{passive:true});
-window.addEventListener('resize',()=>{rescale();onScroll();});
+window.addEventListener('resize',applyLayout);
 
 /* nav */
 function goTo(i){ i=clamp(i,0,SCENES-1); window.scrollTo({top:i*window.innerHeight,behavior:'smooth'}); }
@@ -477,8 +522,7 @@ window.addEventListener('keydown',e=>{
 });
 
 /* init */
-rescale();
-render(0);
+applyLayout();
 </script>
 </body>
 </html>
