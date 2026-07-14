@@ -11,8 +11,9 @@ Vordergrund, am Ende steht das aufgeräumte Produkt.
 
 ## Live-Demo
 
-<!-- Deploy-URL hier eintragen, sobald live -->
-_folgt_
+**https://lenariegerabgeordnetenwatch.codeberg.page/kandidierendencheck/**
+
+Gehostet über [Codeberg Pages](https://codeberg.page) (Branch `pages`).
 
 ## Lokal starten
 
