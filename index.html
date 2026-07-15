@@ -165,6 +165,17 @@ img{display:block;-webkit-user-drag:none;user-select:none}
   font-size:12px;font-weight:500}
 .legal a{color:var(--purple);opacity:.72;text-decoration:none;text-shadow:0 1px 6px rgba(247,243,255,.9)}
 .legal a:hover{opacity:1;text-decoration:underline}
+/* mobile full-width CTA (last scene) */
+.mcta{position:fixed;left:16px;right:16px;bottom:16px;z-index:75;display:none;
+  background:var(--orange);color:#fff;font-weight:600;font-size:18px;text-align:center;text-decoration:none;
+  padding:15px;border-radius:14px;box-shadow:0 14px 30px rgba(244,107,59,.4);opacity:0;pointer-events:none}
+@media(max-width:699px){
+  .mcta{display:block}
+  .headline{font-weight:700}      /* überall etwas weniger fett auf mobile */
+  .logo{font-weight:600}
+  .header-cta{font-weight:600}
+  .ctext .headline{font-size:clamp(28px,7.5vw,32px)}   /* H1 ~30 statt 44 */
+}
 @media (max-width:640px){ .rail{right:10px} .label{width:48%} }
 @media (prefers-reduced-motion:reduce){ .mel>.floaty{animation:none} .hint .arrow{animation:none} html{scroll-behavior:auto} }
 </style>
@@ -194,6 +205,7 @@ img{display:block;-webkit-user-drag:none;user-select:none}
   <a href="https://www.abgeordnetenwatch.de/ueber-uns/impressum" target="_blank" rel="noopener">Impressum</a>
   <a href="https://www.abgeordnetenwatch.de/datenschutzerklaerung" target="_blank" rel="noopener">Datenschutz</a>
 </div>
+<a class="mcta" id="mcta" href="https://www.kandidierendencheck.de" target="_blank" rel="noopener">ich check das jetzt</a>
 
 <script>
 const A="./assets/";
@@ -250,8 +262,8 @@ const MINI_S=0.66;
 // --- mobile: split scene stacks vertically, centred ---
 const MOB=()=>window.innerWidth<700;
 const HCX=640, HCY=388;                                  // native heap centre
-function miniM(cx,cy){ return [ (cx-HCX)*0.42+640, (cy-HCY)*0.42+206 ]; }
-const MINI_S_M=0.42;
+function miniM(cx,cy){ return [ (cx-HCX)*0.56+640, (cy-HCY)*0.56+185 ]; }
+const MINI_S_M=0.56;
 function tag5(el, heapCx, heapCy, baseScale, rot, op){    // store desktop + mobile scene-5 state
   el.k5d = el.k[5];
   const [mx,my]=miniM(heapCx,heapCy);
@@ -411,7 +423,7 @@ productEls();
   const el=mel(212,424,'',dev,0);
   const rest={x:1500,y:393,s:1,r:0,o:0};
   el.k=[rest,rest,rest,rest,rest,{x:915,y:393,s:1,r:0,o:1}];
-  el.k5d=el.k[5]; el.k5m={x:640,y:600,s:.66,r:0,o:1};   // mobile: centred, lower
+  el.k5d=el.k[5]; el.k5m={x:640,y:806,s:1.5,r:0,o:1};   // mobile: big, centred, lower (cut off by button)
   el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
 })();
 
@@ -445,6 +457,7 @@ const rail=document.getElementById('rail');
 for(let i=0;i<SCENES;i++){ const b=document.createElement('button'); b.setAttribute('aria-label','Szene '+(i+1));
   b.addEventListener('click',()=>goTo(i)); rail.appendChild(b); }
 const dots=[...rail.children];
+const mcta=document.getElementById('mcta');
 
 /* ---------------- engine ---------------- */
 function clamp(v,a,b){return v<a?a:v>b?b:v}
@@ -467,6 +480,7 @@ function render(t){
   COPIES.forEach((c,i)=>{ c.style.opacity=clamp(1-Math.abs(t-i)*2.4,0,1); });
   const s5o=clamp(1-Math.abs(t-5)*2.4,0,1);
   scene5.style.opacity=s5o; scene5.style.visibility=s5o<0.02?'hidden':'visible';
+  if(mcta){ mcta.style.opacity=MOB()?s5o:0; mcta.style.pointerEvents=(MOB()&&s5o>.5)?'auto':'none'; }
   const idx=Math.round(t);
   dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
   document.getElementById('progress').style.width=(t/(SCENES-1)*100)+'%';
@@ -476,7 +490,7 @@ function render(t){
 function rescale(){
   const vw=window.innerWidth, vh=window.innerHeight;
   let s;
-  if(vw<700){ s=Math.min(vw/560, vh/820); }        // mobile: Collage größer, links/rechts angeschnitten
+  if(vw<700){ s=Math.min(vw/520, vh/800); }        // mobile: Collage größer, links/rechts angeschnitten
   else{ s=Math.min(vw/1280, vh/832)*0.94; }
   stage.style.setProperty('--s',s);
 }
@@ -490,11 +504,15 @@ function applyLayout(){
         hl=scene5.querySelector('.s5h'),
         bt=scene5.querySelector('.s5btn');
   if(m){
-    cW.style.cssText='left:640px;top:44px;transform:translateX(-50%);font-size:22px';
-    hl.style.cssText='left:640px;top:340px;transform:translateX(-50%);width:94%;text-align:center;font-size:46px';
-    c2.style.cssText='left:640px;top:430px;transform:translateX(-50%);font-size:22px';
-    bt.style.cssText='left:640px;top:790px;transform:translateX(-50%);font-size:28px';
+    const chip='transform:translateX(-50%);background:#4a3d6b;color:#fff;font-size:22px;font-weight:500;padding:7px 20px';
+    cW.innerHTML='Stunden'; c2.innerHTML='2 Minuten';
+    cW.style.cssText='left:640px;top:14px;'+chip;
+    hl.style.cssText='left:640px;top:352px;transform:translateX(-50%);width:92%;text-align:center;font-size:42px;font-weight:700';
+    c2.style.cssText='left:640px;top:430px;'+chip;
+    bt.style.display='none';                        // in-stage button off; mobile uses full-width #mcta
   }else{
+    cW.innerHTML='<span class="dot"></span>Stunden – und noch mehr Verwirrung';
+    c2.innerHTML='<span class="dot"></span>2 Minuten';
     cW.style.cssText='left:'+LEFTX+'px;top:116px;transform:translateX(-50%)';
     c2.style.cssText='left:'+RIGHTX+'px;top:116px;transform:translateX(-50%)';
     hl.style.cssText='left:'+LEFTX+'px';
