@@ -336,8 +336,12 @@ CARD.forEach((c,i)=>{
 });
 
 // --- candidates ---
+// unteren Bereich mit Namensschild-Text wegschneiden (nur betroffene Fotos)
+const CANDCLIP={2:12, 4:17, 5:13, 6:21};   // % vom unteren Rand
 CAND.forEach((c,i)=>{
-  const el=mel(c.row[2],c.row[3],'',imgEl(A+'candidates/kandidatin-'+String(c.img).padStart(2,'0')+'.png'), (i%7)*0.02);
+  const cimg=imgEl(A+'candidates/kandidatin-'+String(c.img).padStart(2,'0')+'.png');
+  if(CANDCLIP[c.img]) cimg.style.clipPath='inset(0 0 '+CANDCLIP[c.img]+'% 0)';
+  const el=mel(c.row[2],c.row[3],'',cimg, (i%7)*0.02);
   const heapS=c.heap[2]/c.row[2];
   const away={x:c.row[0]+(c.row[0]-640)*0.3,y:AWAY_Y,s:heapS*1.05,r:c.row[4],o:0};
   const [mx,my]=mini(c.heap[0],c.heap[1]);
