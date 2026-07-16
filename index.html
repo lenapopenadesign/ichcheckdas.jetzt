@@ -131,7 +131,7 @@ img{display:block;-webkit-user-drag:none;user-select:none}
   font-size:clamp(30px,4.6vw,44px);text-shadow:0 2px 14px rgba(247,243,255,.96),0 0 30px rgba(247,243,255,.9)}
 .headline .o{color:var(--orange)}
 .headline .s{text-decoration:line-through;text-decoration-color:var(--orange)}
-.subline{margin:18px auto 0;max-width:34ch;font-weight:400;font-size:clamp(18px,2.4vw,22px);color:var(--purple);line-height:1.5;
+.subline{margin:18px auto 0;max-width:none;font-weight:400;font-size:clamp(18px,2.4vw,22px);color:var(--purple);line-height:1.5;
   text-shadow:0 1px 10px rgba(247,243,255,.98),0 0 20px rgba(247,243,255,.9)}
 .hint{margin-top:22px;font-weight:400;font-size:15px;color:var(--purple);opacity:.9;display:inline-flex;align-items:center;gap:10px}
 .hint .arrow{display:inline-block;animation:nudge 1.6s ease-in-out infinite}
@@ -163,12 +163,16 @@ img{display:block;-webkit-user-drag:none;user-select:none}
   font-size:12px;font-weight:500}
 .legal a{color:var(--purple);opacity:.72;text-decoration:none;text-shadow:0 1px 6px rgba(247,243,255,.9)}
 .legal a:hover{opacity:1;text-decoration:underline}
-/* mobile full-width CTA (last scene) */
-.mcta{position:fixed;left:16px;right:16px;bottom:16px;z-index:75;display:none;
-  background:var(--orange);color:#fff;font-weight:600;font-size:18px;text-align:center;text-decoration:none;
-  padding:15px;border-radius:14px;box-shadow:0 14px 30px rgba(244,107,59,.4);opacity:0;pointer-events:none}
+/* Zeit-Chip als Kicker über der Headline (letzte Seite) */
+.tchip{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--purple);font-weight:600;
+  font-size:14px;padding:8px 18px;border-radius:100px;box-shadow:0 10px 24px rgba(41,28,77,.14);margin-bottom:16px}
+.tchip .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+/* CTA am Ende der letzten Seite */
+.copycta{display:inline-block;margin-top:24px;background:var(--orange);color:#fff;font-weight:700;
+  font-size:18px;text-decoration:none;padding:16px 34px;border-radius:14px;pointer-events:auto;
+  box-shadow:0 14px 30px rgba(244,107,59,.4);transition:transform .15s,box-shadow .15s}
+.copycta:hover{transform:translateY(-2px);box-shadow:0 18px 36px rgba(244,107,59,.5)}
 @media(max-width:699px){
-  .mcta{display:block}
   .headline{font-weight:700}      /* überall etwas weniger fett auf mobile */
   .logo{font-weight:600}
   .ctext .headline{font-size:clamp(28px,7.5vw,32px)}   /* H1 ~30 statt 44 */
@@ -198,18 +202,16 @@ img{display:block;-webkit-user-drag:none;user-select:none}
   <section class="snap"></section>
   <section class="snap"></section>
   <section class="snap"></section>
-  <section class="snap"></section>
 </div>
 <nav class="rail" id="rail"></nav>
 <div class="legal">
   <a href="https://www.abgeordnetenwatch.de/ueber-uns/impressum" target="_blank" rel="noopener">Impressum</a>
   <a href="https://www.abgeordnetenwatch.de/datenschutzerklaerung" target="_blank" rel="noopener">Datenschutz</a>
 </div>
-<a class="mcta" id="mcta" href="https://www.kandidierendencheck.de" target="_blank" rel="noopener">ich check das jetzt</a>
 
 <script>
 const A="./assets/";
-const SCENES=6;
+const SCENES=5;   // Split-Seite entfernt (war Szene 6)
 
 /* ---------------- figma coordinates (stage 1280x832) ---------------- */
 // candidates: heap(act1) & row(act2) as [cx,cy,w,h,rot]
@@ -401,10 +403,10 @@ THESIS.forEach((t,i)=>{
 function productEls(){
   // real Karte + Voting Inputs, composed & tilted exactly as in Figma (Group 1)
   const cv=mel(366,412,'flat',imgEl(A+'ui/card-voting.png'),0);
-  cv.k=fill([{x:498,y:1180,s:1,r:0,o:0}],{x:498,y:372,s:1,r:0,o:1},{x:498,y:-360,s:1,r:0,o:0});
+  cv.k=fill([{x:444,y:1180,s:1,r:0,o:0}],{x:444,y:344,s:1,r:0,o:1},{x:444,y:-360,s:1,r:0,o:0});
 
   const r=mel(404,355,'flat',imgEl(A+'ui/results.png'),.06);      // real Kandidierende panel
-  r.k=fill([{x:874,y:1220,s:1,r:0,o:0}],{x:874,y:352,s:1,r:0,o:1},{x:874,y:-330,s:1,r:0,o:0});
+  r.k=fill([{x:820,y:1220,s:1,r:0,o:0}],{x:820,y:324,s:1,r:0,o:1},{x:820,y:-330,s:1,r:0,o:0});
 
   [cv,r].forEach(e=>{ e.node.style.opacity=0; stage.appendChild(e.node); ELS.push(e); });
 }
@@ -420,16 +422,6 @@ function matchRow(img,name,pct){
 }
 productEls();
 
-// --- phone (scene 5) : real figma Ergebnisseite ---
-(()=>{
-  const dev=document.createElement('div'); dev.className='device';
-  dev.innerHTML=`<div class="notch"></div><div class="scr"><img src="${A}ui/phone.png" alt=""></div>`;
-  const el=mel(212,424,'',dev,0);
-  const rest={x:1500,y:393,s:1,r:0,o:0};
-  el.k=[rest,rest,rest,rest,rest,{x:915,y:393,s:1,r:0,o:1}];
-  el.k5d=el.k[5]; el.k5m={x:640,y:806,s:1.5,r:0,o:1};   // mobile: big, centred, lower (cut off by button)
-  el.node.style.opacity=0; stage.appendChild(el.node); ELS.push(el);
-})();
 
 /* ---------------- copy overlays ---------------- */
 const copylayer=document.getElementById('copylayer');
@@ -439,29 +431,18 @@ const COPY=[
  `<div class="ctext"><h1 class="headline">wer sind meine<br><span class="o">kandidierenden?</span></h1></div>`,
  `<div class="ctext"><h1 class="headline">wie stehen sie zu<br><span class="o">meinen themen?</span></h1></div>`,
  `<div class="ctext"><h1 class="headline">wer kriegt meine<br><span class="o">erststimme?</span></h1></div>`,
- `<div class="ctext"><h1 class="headline">check das <span class="o">jetzt!</span></h1>
-    <p class="subline">Thesen swipen, PLZ rein, Match für die Erststimme&nbsp;sehen.</p></div>`,
+ `<div class="ctext"><div class="tchip"><span class="dot"></span>nur 5 Minuten</div>
+    <h1 class="headline">check das <span class="o">jetzt!</span></h1>
+    <p class="subline">Thesen swipen, PLZ rein, Match für die Erststimme&nbsp;sehen.</p>
+    <a class="copycta" href="https://www.kandidierendencheck.de" target="_blank" rel="noopener">check das jetzt</a></div>`,
 ];
 const COPIES=COPY.map(html=>{ const d=document.createElement('div'); d.className='copy'; d.innerHTML=html; d.style.opacity=0; copylayer.appendChild(d); return d; });
-
-/* scene 6 (split) overlay — lives INSIDE the stage so chip/headline align with heap & phone */
-const LEFTX=395, RIGHTX=915;
-const scene5=document.createElement('div');
-scene5.style.cssText='position:absolute;inset:0;z-index:30;pointer-events:none';
-scene5.innerHTML=`
-  <div class="chip warn" style="left:${LEFTX}px;top:116px;transform:translateX(-50%)"><span class="dot"></span>Stunden – und noch mehr Verwirrung</div>
-  <div class="chip" style="left:${RIGHTX}px;top:116px;transform:translateX(-50%)"><span class="dot"></span>2 Minuten</div>
-  <h1 class="headline s5h" style="left:${LEFTX}px">ich check das <span class="o">nicht.</span></h1>
-  <a class="act-cta s5btn" style="left:${RIGHTX}px" href="https://www.kandidierendencheck.de" target="_blank" rel="noopener">ich check das jetzt</a>`;
-scene5.style.opacity=0; scene5.style.visibility='hidden';
-stage.appendChild(scene5);
 
 /* rail dots */
 const rail=document.getElementById('rail');
 for(let i=0;i<SCENES;i++){ const b=document.createElement('button'); b.setAttribute('aria-label','Szene '+(i+1));
   b.addEventListener('click',()=>goTo(i)); rail.appendChild(b); }
 const dots=[...rail.children];
-const mcta=document.getElementById('mcta');
 
 /* ---------------- engine ---------------- */
 function clamp(v,a,b){return v<a?a:v>b?b:v}
@@ -481,10 +462,7 @@ function render(t){
     e.node.style.opacity=o;
     e.node.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%) rotate(${r}deg) scale(${s})`;
   }
-  COPIES.forEach((c,i)=>{ c.style.opacity=clamp(1-Math.abs(t-i)*2.4,0,1); });
-  const s5o=clamp(1-Math.abs(t-5)*2.4,0,1);
-  scene5.style.opacity=s5o; scene5.style.visibility=s5o<0.02?'hidden':'visible';
-  if(mcta){ mcta.style.opacity=MOB()?s5o:0; mcta.style.pointerEvents=(MOB()&&s5o>.5)?'auto':'none'; }
+  COPIES.forEach((c,i)=>{ const o=clamp(1-Math.abs(t-i)*2.4,0,1); c.style.opacity=o; c.style.pointerEvents=o>0.5?'auto':'none'; });
   const idx=Math.round(t);
   dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
   document.getElementById('progress').style.width=(t/(SCENES-1)*100)+'%';
@@ -499,29 +477,7 @@ function rescale(){
   stage.style.setProperty('--s',s);
 }
 
-/* responsive: split scene side-by-side (desktop) vs stacked (mobile) */
 function applyLayout(){
-  const m=MOB();
-  for(const e of ELS){ if(e.k5m){ e.k[5]=m?e.k5m:e.k5d; } }
-  const cW=scene5.querySelector('.chip.warn'),
-        c2=scene5.querySelector('.chip:not(.warn)'),
-        hl=scene5.querySelector('.s5h'),
-        bt=scene5.querySelector('.s5btn');
-  if(m){
-    const chip='transform:translateX(-50%);font-size:20px;font-weight:600;padding:8px 18px';   // weiß (wie Desktop), nur kleiner/leichter
-    cW.innerHTML='<span class="dot"></span>Stunden'; c2.innerHTML='<span class="dot"></span>2 Minuten';
-    cW.style.cssText='left:640px;top:14px;'+chip;
-    hl.style.cssText='left:640px;top:352px;transform:translateX(-50%);width:92%;text-align:center;font-size:42px;font-weight:700';
-    c2.style.cssText='left:640px;top:430px;'+chip;
-    bt.style.display='none';                        // in-stage button off; mobile uses full-width #mcta
-  }else{
-    cW.innerHTML='<span class="dot"></span>Stunden – und noch mehr Verwirrung';
-    c2.innerHTML='<span class="dot"></span>2 Minuten';
-    cW.style.cssText='left:'+LEFTX+'px;top:116px;transform:translateX(-50%)';
-    c2.style.cssText='left:'+RIGHTX+'px;top:116px;transform:translateX(-50%)';
-    hl.style.cssText='left:'+LEFTX+'px';
-    bt.style.cssText='left:'+RIGHTX+'px';
-  }
   rescale();
   render(window.pageYOffset/window.innerHeight || 0);
 }
