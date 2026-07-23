@@ -4,6 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>kandidierendencheck – ich check das jetzt.</title>
+<meta name="description" content="Kandidierendencheck: Thesen swipen wie bei Tinder, PLZ eingeben und in nur 5 Minuten deinen Match für die Erststimme finden. Ein Projekt von abgeordnetenwatch.de.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#6a5a8e">
+<link rel="canonical" href="https://ichcheckdas.jetzt/">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="kandidierendencheck">
+<meta property="og:title" content="kandidierendencheck – ich check das jetzt.">
+<meta property="og:description" content="Thesen swipen, PLZ rein, Match für die Erststimme sehen – in nur 5 Minuten. Ein Projekt von abgeordnetenwatch.de.">
+<meta property="og:url" content="https://ichcheckdas.jetzt/">
+<meta property="og:locale" content="de_DE">
+<meta property="og:image" content="https://ichcheckdas.jetzt/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kandidierendencheck – check das jetzt">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kandidierendencheck – ich check das jetzt.">
+<meta name="twitter:description" content="Thesen swipen, PLZ rein, Match für die Erststimme sehen – in nur 5 Minuten.">
+<meta name="twitter:image" content="https://ichcheckdas.jetzt/assets/og-image.png">
 <style>
 /* selbst gehostete Schrift – kein externer Request (Datenschutz) */
 @font-face{font-family:'Outfit';font-weight:300;font-style:normal;font-display:swap;src:url('assets/fonts/outfit-300.woff2') format('woff2')}
@@ -160,7 +181,7 @@ img{display:block;-webkit-user-drag:none;user-select:none}
 .rail button.on{background:var(--orange);height:26px;border-radius:100px}
 .progress{position:fixed;top:0;left:0;height:3px;background:var(--orange);z-index:90;width:0}
 .legal{position:fixed;left:clamp(16px,4vw,32px);bottom:12px;z-index:70;display:flex;gap:16px;
-  font-size:12px;font-weight:500}
+  font-size:13.5px;font-weight:500}
 .legal a{color:var(--purple);opacity:.72;text-decoration:none;text-shadow:0 1px 6px rgba(247,243,255,.9)}
 .legal a:hover{opacity:1;text-decoration:underline}
 /* Zeit-Chip als Kicker über der Headline (letzte Seite) */
@@ -178,7 +199,7 @@ img{display:block;-webkit-user-drag:none;user-select:none}
   .ctext .headline{font-size:clamp(28px,7.5vw,32px)}   /* H1 ~30 statt 44 */
   .header-cta{display:none}                 /* kein Button in der mobilen Navigation */
   .site-header{justify-content:center}      /* Logo zentriert */
-  .legal{left:0;right:0;justify-content:center}   /* Impressum/Datenschutz mittig */
+  .legal{left:0;right:0;justify-content:center;font-size:12px}   /* Impressum/Datenschutz mittig, mobil wieder 12px */
 }
 @media (max-width:640px){ .rail{right:10px} .label{width:48%} }
 @media (prefers-reduced-motion:reduce){ .mel>.floaty{animation:none} .hint .arrow{animation:none} html{scroll-behavior:auto} }
@@ -226,21 +247,21 @@ const CAND=[
 ];
 // cards: heap(act1) [cx,cy,rot] + thesis(act3) [cx,cy,w,h]
 const CARD=[
- {heap:[687.9,549.8,-9.96], th:[640.6,318.2,232,260]},
- {heap:[698.7,546.0,-7.45], th:[717.6,423.2,255,278]},
- {heap:[686.1,565.8,-7.46], th:[673.9,452.9,260,282]},
- {heap:[684.8,551.7,-3.17], th:[648.8,391.2,199,232]},
- {heap:[848.0,508.0,1.24],  th:[601.3,437.7,216,247]},
- {heap:[846.3,520.8,7.39],  th:[592.0,368.1,241,267]},
+ {heap:[640,120,-8],   th:[640.6,318.2,232,260]},
+ {heap:[920,600,5],    th:[717.6,423.2,255,278]},
+ {heap:[1060,560,-4],  th:[673.9,452.9,260,282]},
+ {heap:[520,585,8],    th:[648.8,391.2,199,232]},
+ {heap:[960,420,3],    th:[601.3,437.7,216,247]},
+ {heap:[990,300,-7],   th:[592.0,368.1,241,267]},
  {heap:[840.6,524.6,6.96],  th:[548.4,388.1,241,266]},
  {heap:[595.7,570.6,9.85],  th:[537.0,398.0,253,276]},
- {heap:[406.5,271.0,3.54],  th:[579.1,308.4,237,264]},
- {heap:[400.5,266.3,4.17],  th:[572.0,309.2,247,272]},
- {heap:[407.3,269.6,8.29],  th:[624.5,241.1,203,236]},
- {heap:[412.6,264.0,4.35],  th:[654.1,293.5,235,262]},
- {heap:[489.9,509.8,3.70],  th:[715.0,292.1,221,250]},
- {heap:[708.1,189.3,-8.75], th:[773.7,300.6,250,274]},
- {heap:[483.1,310.2,-4.83], th:[487.2,444.3,222,251]},
+ {heap:[230,220,4],    th:[579.1,308.4,237,264]},
+ {heap:[230,420,-5],   th:[572.0,309.2,247,272]},
+ {heap:[410,300,6],    th:[624.5,241.1,203,236]},
+ {heap:[410,500,-6],   th:[654.1,293.5,235,262]},
+ {heap:[1000,670,4],   th:[715.0,292.1,221,250]},
+ {heap:[1080,180,-8],  th:[773.7,300.6,250,274]},
+ {heap:[230,610,5],    th:[487.2,444.3,222,251]},
 ];
 // topic titles in the order of thesis/photo-00..20 (figma dom order)
 const TTITLE=[
@@ -306,7 +327,7 @@ const PILE=[640,440];   // central collapse point
   const m=mel(560,560,'bg',imgEl(A+'berlin.svg'),0);
   const [mx,my]=mini(600,392);
   m.k=[
-   {x:600,y:392,s:1.0,r:0,o:.20},    // 0 heap
+   {x:600,y:392,s:1.9,r:0,o:.26},    // 0 heap
    {x:600,y:392,s:1.0,r:0,o:0},      // 1
    {x:600,y:392,s:1.0,r:0,o:0},      // 2
    {x:614,y:378,s:1.35,r:0,o:.30},   // 3 ballot page: Berlin hinter dem Wahlzettel

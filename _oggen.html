@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>OG generator</title>
+<style>html,body{margin:0;background:#333}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<script>
+async function run(){
+  const load = (w,f)=>new FontFace('Outfit', "url(assets/fonts/"+f+")", {weight:String(w)}).load().then(ff=>document.fonts.add(ff));
+  try{ await Promise.all([load(500,'outfit-500.woff2'),load(600,'outfit-600.woff2'),load(700,'outfit-700.woff2'),load(800,'outfit-800.woff2')]); }catch(e){}
+  await document.fonts.ready;
+
+  const cv=document.getElementById('c'), x=cv.getContext('2d');
+  const W=1200,H=630;
+  const purple='#6a5a8e', pdark='#3a324c', orange='#f46b3b', bg='#f7f3ff';
+
+  // background
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#f7f3ff'); g.addColorStop(1,'#ece6f8');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+
+  // decorative check badge, top-right
+  x.save();
+  x.globalAlpha=1; x.fillStyle=orange;
+  const bx=W-250, by=120, bs=170, br=40;
+  const rr=(X,Y,Wd,Ht,R)=>{x.beginPath();x.moveTo(X+R,Y);x.arcTo(X+Wd,Y,X+Wd,Y+Ht,R);x.arcTo(X+Wd,Y+Ht,X,Y+Ht,R);x.arcTo(X,Y+Ht,X,Y,R);x.arcTo(X,Y,X+Wd,Y,R);x.closePath();};
+  x.shadowColor='rgba(244,107,59,.35)'; x.shadowBlur=40; x.shadowOffsetY=18;
+  rr(bx,by,bs,bs,br); x.fill();
+  x.shadowColor='transparent';
+  x.strokeStyle='#fff'; x.lineWidth=20; x.lineCap='round'; x.lineJoin='round';
+  x.beginPath(); x.moveTo(bx+42,by+90); x.lineTo(bx+72,by+120); x.lineTo(bx+128,by+52); x.stroke();
+  x.restore();
+
+  // wordmark top-left
+  x.textBaseline='alphabetic';
+  x.font='700 40px Outfit';
+  let wx=90, wy=118;
+  x.fillStyle=purple; x.fillText('kandidierenden', wx, wy);
+  const wpart=x.measureText('kandidierenden').width;
+  x.fillStyle=orange; x.fillText('check', wx+wpart, wy);
+
+  // time chip
+  const chipY=200, chipX=90, chipText='nur 5 Minuten';
+  x.font='600 26px Outfit';
+  const ctw=x.measureText(chipText).width;
+  const chipW=ctw+40+34, chipH=54;
+  x.save();
+  x.shadowColor='rgba(41,28,77,.14)'; x.shadowBlur=24; x.shadowOffsetY=10;
+  x.fillStyle='#fff'; rr(chipX,chipY,chipW,chipH,27); x.fill();
+  x.restore();
+  x.fillStyle=purple; x.beginPath(); x.arc(chipX+27,chipY+chipH/2,7,0,7); x.fill();
+  x.fillStyle=purple; x.textBaseline='middle'; x.fillText(chipText, chipX+44, chipY+chipH/2+1);
+  x.textBaseline='alphabetic';
+
+  // headline
+  x.font='800 118px Outfit';
+  const hy=390, hx=86;
+  x.fillStyle=pdark; x.fillText('check das ', hx, hy);
+  const hp=x.measureText('check das ').width;
+  x.fillStyle=orange; x.fillText('jetzt.', hx+hp, hy);
+
+  // tagline
+  x.font='500 33px Outfit'; x.fillStyle=purple;
+  x.fillText('Thesen swipen, PLZ rein, Match für die Erststimme sehen.', 90, 470);
+
+  // domain + credit bottom
+  x.font='700 34px Outfit'; x.fillStyle=orange;
+  x.fillText('ichcheckdas.jetzt', 90, 560);
+  x.font='500 24px Outfit'; x.fillStyle='rgba(58,50,76,.62)';
+  const credit='ein Projekt von abgeordnetenwatch.de';
+  x.fillText(credit, W-90-x.measureText(credit).width, 560);
+
+  window.__ogdata = cv.toDataURL('image/png');
+  document.title='OG-READY';
+}
+run();
+</script>
+</body>
+</html>
