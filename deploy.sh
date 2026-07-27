@@ -8,7 +8,7 @@
 #
 set -euo pipefail
 
-USER="${UBERSPACE_USER:-DEIN_USER}"
+USER="${UBERSPACE_USER:-awkc}"
 HOST="${UBERSPACE_HOST:-${USER}.uber.space}"   # SSH-Host, i.d.R. <user>.uber.space
 
 if [ "$USER" = "DEIN_USER" ]; then
