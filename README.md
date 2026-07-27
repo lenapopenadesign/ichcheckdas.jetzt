@@ -11,9 +11,9 @@ Vordergrund, am Ende steht das aufgeräumte Produkt.
 
 ## Live-Demo
 
-**https://lenariegerabgeordnetenwatch.codeberg.page/kandidierendencheck/**
+**https://ichcheckdas.jetzt**
 
-Gehostet über [Codeberg Pages](https://codeberg.page) (Branch `pages`).
+Gehostet auf [Uberspace](https://uberspace.de) (Mainz, DE). Deployment-Anleitung: [DEPLOY.md](DEPLOY.md), Skript: [`deploy.sh`](deploy.sh).
 
 ## Lokal starten
 
@@ -30,11 +30,13 @@ python3 -m http.server 8777
 ```
 index.html        # gesamte Seite: HTML, CSS und die Scroll-Engine (Vanilla JS)
 assets/
-  candidates/     # freigestellte Kandidat:innen
+  candidates/     # freigestellte Kandidat:innen (Quelldateien)
+  collage/        # abgeleitete Collage-Assets (Kandidierende-Cutouts, Wahl-Objekte)
   thesis/         # Themen-/Thesenkarten (Fotos + Titel)
   ui/             # Produkt-Screens (Swipe-Karte, Ergebnisliste, Handy)
   ballot-orig.png # Stimmzettel
-  bg-collage.png  # Bundesland-Outline (Hintergrund)
+  berlin.svg      # Bundesland-Outline (Hintergrund)
+  og-image.png    # Social-Preview (Collage-Snapshot)
 ```
 
 ## Technik
