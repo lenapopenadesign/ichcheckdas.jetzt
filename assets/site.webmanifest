@@ -1,0 +1,12 @@
+{
+  "name": "kandidierendencheck",
+  "short_name": "KC",
+  "icons": [
+    { "src": "favicon-96x96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "favicon.svg", "type": "image/svg+xml" }
+  ],
+  "theme_color": "#6a5a8e",
+  "background_color": "#f7f3ff",
+  "display": "standalone"
+}
